@@ -3,6 +3,7 @@
  * Lance l'app Express directement sur le port configuré.
  * Utilisé avec : pnpm dev (via ts-node-dev)
  */
+import 'dotenv/config';
 import { createApp } from './app';
 import { env } from './config/env';
 import { logger } from './utils/logger';
