@@ -1,3 +1,4 @@
+import * as admin from 'firebase-admin';
 import { verifyPassword } from '@/utils/password';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '@/utils/token';
 import { AppError, ErrorCode } from '@/utils/errors';
@@ -66,8 +67,8 @@ export async function login(email: string, password: string): Promise<LoginResul
     .doc(jti)
     .set({
       userId: user.id,
-      createdAt: FirebaseFirestore.Timestamp.now(),
-      expiresAt: FirebaseFirestore.Timestamp.fromDate(new Date(Date.now() + 8 * 60 * 60 * 1000)),
+      createdAt: admin.firestore.Timestamp.now(),
+      expiresAt: admin.firestore.Timestamp.fromDate(new Date(Date.now() + 8 * 60 * 60 * 1000)),
     });
 
   return {
