@@ -14,6 +14,7 @@
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage --passWithNoTests",
     "test:integration": "FIRESTORE_EMULATOR_HOST=localhost:8080 jest --testPathPattern=integration --passWithNoTests",
+    "seed": "ts-node-dev --transpile-only --project tsconfig.json scripts/seed.ts",
     "clean": "rm -rf dist coverage",
     "deploy:staging": "firebase deploy --only functions --project staging",
     "deploy:prod": "firebase deploy --only functions --project production"
