@@ -9,12 +9,8 @@ import { errorHandler } from '@/middleware/errorHandler';
 import { logger } from '@/utils/logger';
 
 import { authRouter } from '@/routes/auth.routes';
-// import { productsRouter } from '@/routes/products.routes';
-// import { productsRouter } from '@/routes/products.routes';
-// import { salesRouter }    from '@/routes/sales.routes';
-// import { clientsRouter }  from '@/routes/clients.routes';
-// import { stockRouter }    from '@/routes/stock.routes';
-// import { usersRouter }    from '@/routes/users.routes';
+import { productsRouter } from '@/routes/products.routes';
+import { salesRouter } from '@/routes/sales.routes';
 
 export function createApp(): Application {
   const app = express();
@@ -68,11 +64,8 @@ export function createApp(): Application {
 
   // ── Routes applicatives ───────────────────────────────────────────────────
   app.use('/api/auth', authRouter);
-  // app.use('/api/products', productsRouter);
-  // app.use('/api/sales',    salesRouter);
-  // app.use('/api/clients',  clientsRouter);
-  // app.use('/api/stock',    stockRouter);
-  // app.use('/api/users',    usersRouter);
+  app.use('/api/products', productsRouter);
+  app.use('/api/sales', salesRouter);
 
   // ── 404 ────────────────────────────────────────────────────────────────────
   app.use((_req, res) => {
