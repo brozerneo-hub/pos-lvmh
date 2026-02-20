@@ -1,3 +1,4 @@
+import * as admin from 'firebase-admin';
 import { getFirestore } from '@/config/firebase';
 import type { UserRole } from '@pos-lvmh/shared';
 
@@ -11,7 +12,7 @@ export interface UserDoc {
   passwordHash: string;
   isActive: boolean;
   loginAttempts: number;
-  lockedUntil: FirebaseFirestore.Timestamp | null;
+  lockedUntil: admin.firestore.Timestamp | null;
 }
 
 const col = () => getFirestore().collection('users');
@@ -32,8 +33,8 @@ export async function updateLoginAttempts(
     .doc(userId)
     .update({
       loginAttempts: attempts,
-      lockedUntil: lockedUntil ? FirebaseFirestore.Timestamp.fromDate(lockedUntil) : null,
-      updatedAt: FirebaseFirestore.Timestamp.now(),
+      lockedUntil: lockedUntil ? admin.firestore.Timestamp.fromDate(lockedUntil) : null,
+      updatedAt: admin.firestore.Timestamp.now(),
     });
 }
 
@@ -41,7 +42,7 @@ export async function recordLogin(userId: string): Promise<void> {
   await col().doc(userId).update({
     loginAttempts: 0,
     lockedUntil: null,
-    lastLoginAt: FirebaseFirestore.Timestamp.now(),
-    updatedAt: FirebaseFirestore.Timestamp.now(),
+    lastLoginAt: admin.firestore.Timestamp.now(),
+    updatedAt: admin.firestore.Timestamp.now(),
   });
 }
