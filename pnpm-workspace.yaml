@@ -1,0 +1,12 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Approuver les compilations natives requises (argon2, esbuild, etc.)
+onlyBuiltDependencies:
+  - '@firebase/util'
+  - 'argon2'
+  - 'core-js'
+  - 'esbuild'
+  - 'msw'
+  - 'protobufjs'

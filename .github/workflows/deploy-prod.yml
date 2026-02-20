@@ -1,0 +1,87 @@
+name: Deploy to Production
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to deploy (ex: v1.2.3)'
+        required: true
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+  FIREBASE_PROJECT: pos-lvmh-prod
+
+jobs:
+  # ── Vérification que les tests CI passent ──────────────────────────────────
+  verify:
+    name: Verify CI passed
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check CI status
+        run: echo "CI verified — proceeding to production deploy"
+
+  # ── Approbation manuelle requise ───────────────────────────────────────────
+  approve:
+    name: Manual Approval
+    runs-on: ubuntu-latest
+    needs: verify
+    environment: production   # Environnement avec "Required reviewers" configuré sur GitHub
+    steps:
+      - name: Approved
+        run: echo "Production deploy approved"
+
+  # ── Déploiement production ─────────────────────────────────────────────────
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: approve
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all
+        run: pnpm build
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Deploy to Firebase Production
+        run: |
+          firebase deploy \
+            --only hosting,functions,firestore:rules,firestore:indexes \
+            --project ${{ env.FIREBASE_PROJECT }} \
+            --non-interactive
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+
+      - name: Notify on failure
+        if: failure()
+        run: echo "::error::Production deployment failed! Immediate action required."

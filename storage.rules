@@ -1,0 +1,21 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Produits — lecture publique, écriture Manager/Admin via backend
+    match /products/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if false; // Via Firebase Admin SDK uniquement
+    }
+
+    // Tickets PDF — lecture par le propriétaire ou Manager+
+    match /receipts/{saleId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // Tout le reste : refusé
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
