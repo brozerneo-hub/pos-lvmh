@@ -19,6 +19,16 @@ export default {
           900: '#58401e',
         },
         gold: {
+          50: '#fdfaf0',
+          100: '#faf3d6',
+          200: '#f2e4a8',
+          300: '#e6cf72',
+          400: '#d4b96a',
+          500: '#C09A44',
+          600: '#a67d35',
+          700: '#86612a',
+          800: '#6b4c22',
+          900: '#58401e',
           DEFAULT: '#C09A44',
           light: '#D4B96A',
           dark: '#A67D35',
@@ -38,6 +48,9 @@ export default {
         '18': '4.5rem',
         '88': '22rem',
         '128': '32rem',
+      },
+      borderRadius: {
+        luxury: '0.75rem',
       },
       boxShadow: {
         luxury: '0 4px 24px -4px rgba(192, 154, 68, 0.15)',
