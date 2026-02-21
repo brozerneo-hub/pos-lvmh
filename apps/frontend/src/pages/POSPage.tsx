@@ -1,13 +1,23 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShoppingCart, Trash2, Plus, Minus, WifiOff } from 'lucide-react';
-import { ProductCategory, PaymentMethod } from '@pos-lvmh/shared';
+import { ProductCategory, PaymentMethod, type CartLine } from '@pos-lvmh/shared';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { PaymentModal } from '@/features/pos/PaymentModal';
+import { TicketModal } from '@/features/pos/TicketModal';
 import { api } from '@/services/api';
 import { db } from '@/offline/db';
 import { v4 as uuid } from 'uuid';
+
+interface TicketData {
+  saleId: string;
+  lines: CartLine[];
+  totalHT: number;
+  totalVAT: number;
+  totalTTC: number;
+  paymentMode: PaymentMethod;
+}
 
 interface ProductDoc {
   id: string;
@@ -35,6 +45,7 @@ export default function POSPage() {
   const [category, setCategory] = useState('');
   const [showPayment, setShowPayment] = useState(false);
   const [offlineSaved, setOfflineSaved] = useState(false);
+  const [ticket, setTicket] = useState<TicketData | null>(null);
 
   const queryClient = useQueryClient();
   const { lines, add, remove, setQty, clear, totals } = useCartStore();
@@ -77,10 +88,15 @@ export default function POSPage() {
         return { offline: true };
       }
 
-      await api.post('/sales', { lines, paymentMode: vars.mode, paymentDetails });
-      return { offline: false };
+      const res = await api.post<{ data: { saleId: string } }>('/sales', {
+        lines,
+        paymentMode: vars.mode,
+        paymentDetails,
+      });
+      return { offline: false, saleId: res.data.data.saleId, mode: vars.mode };
     },
-    onSuccess: (result) => {
+    onSuccess: (result, vars) => {
+      const snapshot = { ...t, lines: [...lines] };
       clear();
       setShowPayment(false);
       if (result.offline) {
@@ -89,6 +105,14 @@ export default function POSPage() {
       } else {
         void queryClient.invalidateQueries({ queryKey: ['stock'] });
         void queryClient.invalidateQueries({ queryKey: ['sales'] });
+        setTicket({
+          saleId: result.saleId ?? uuid(),
+          lines: snapshot.lines,
+          totalHT: snapshot.totalHT,
+          totalVAT: snapshot.totalVAT,
+          totalTTC: snapshot.totalTTC,
+          paymentMode: vars.mode,
+        });
       }
     },
   });
@@ -291,6 +315,18 @@ export default function POSPage() {
           />
         )}
       </div>
+
+      {ticket && (
+        <TicketModal
+          saleId={ticket.saleId}
+          lines={ticket.lines}
+          totalHT={ticket.totalHT}
+          totalVAT={ticket.totalVAT}
+          totalTTC={ticket.totalTTC}
+          paymentMode={ticket.paymentMode}
+          onClose={() => setTicket(null)}
+        />
+      )}
     </div>
   );
 }

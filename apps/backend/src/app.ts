@@ -13,6 +13,7 @@ import { productsRouter } from '@/routes/products.routes';
 import { salesRouter } from '@/routes/sales.routes';
 import { clientsRouter } from '@/routes/clients.routes';
 import { stockRouter } from '@/routes/stock.routes';
+import { adminRouter } from '@/routes/admin.routes';
 
 export function createApp(): Application {
   const app = express();
@@ -70,6 +71,7 @@ export function createApp(): Application {
   app.use('/api/sales', salesRouter);
   app.use('/api/clients', clientsRouter);
   app.use('/api/stock', stockRouter);
+  app.use('/api/admin', adminRouter);
 
   // ── 404 ────────────────────────────────────────────────────────────────────
   app.use((_req, res) => {
