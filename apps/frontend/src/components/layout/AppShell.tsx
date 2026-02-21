@@ -1,8 +1,21 @@
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Receipt, Users, Package, LogOut, Settings } from 'lucide-react';
+import {
+  ShoppingCart,
+  Receipt,
+  Users,
+  Package,
+  LogOut,
+  Settings,
+  Wifi,
+  WifiOff,
+  RefreshCw,
+} from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { UserRole } from '@pos-lvmh/shared';
 import { useAuthStore } from '@/stores/authStore';
 import { api } from '@/services/api';
+import { usePendingCount, syncPendingSales, useSyncOnReconnect } from '@/offline/syncService';
 
 const NAV = [
   { to: '/', label: 'Caisse', icon: ShoppingCart, end: true, minRole: UserRole.CASHIER },
@@ -21,6 +34,29 @@ const NAV = [
 export function AppShell() {
   const { user, hasRole, clearAuth } = useAuthStore();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const pendingCount = usePendingCount();
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [syncing, setSyncing] = useState(false);
+
+  useSyncOnReconnect(queryClient);
+
+  useEffect(() => {
+    const on = () => setIsOnline(true);
+    const off = () => setIsOnline(false);
+    window.addEventListener('online', on);
+    window.addEventListener('offline', off);
+    return () => {
+      window.removeEventListener('online', on);
+      window.removeEventListener('offline', off);
+    };
+  }, []);
+
+  async function handleManualSync() {
+    setSyncing(true);
+    await syncPendingSales(queryClient);
+    setSyncing(false);
+  }
 
   async function handleLogout() {
     try {
@@ -61,6 +97,33 @@ export function AppShell() {
             </NavLink>
           ))}
         </nav>
+
+        {/* Statut réseau */}
+        <div className="px-4 py-3 border-t border-white/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {isOnline ? (
+                <Wifi size={13} className="text-green-400" />
+              ) : (
+                <WifiOff size={13} className="text-orange-400" />
+              )}
+              <span className={`text-xs ${isOnline ? 'text-green-400' : 'text-orange-400'}`}>
+                {isOnline ? 'En ligne' : 'Hors ligne'}
+              </span>
+            </div>
+            {pendingCount > 0 && (
+              <button
+                onClick={handleManualSync}
+                disabled={!isOnline || syncing}
+                title={`${pendingCount} vente(s) à synchroniser`}
+                className="flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 disabled:opacity-50 transition-colors"
+              >
+                <RefreshCw size={11} className={syncing ? 'animate-spin' : ''} />
+                {pendingCount}
+              </button>
+            )}
+          </div>
+        </div>
 
         {/* User + Logout */}
         <div className="px-4 py-4 border-t border-white/10">

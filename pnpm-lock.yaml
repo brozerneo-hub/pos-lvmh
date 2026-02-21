@@ -144,6 +144,9 @@ importers:
       '@tanstack/react-query-devtools':
         specifier: ^5.62.0
         version: 5.91.3(@tanstack/react-query@5.90.21(react@18.3.1))(react@18.3.1)
+      '@types/uuid':
+        specifier: ^10.0.0
+        version: 10.0.0
       axios:
         specifier: ^1.7.0
         version: 1.13.5
@@ -192,6 +195,9 @@ importers:
       tailwind-merge:
         specifier: ^2.5.5
         version: 2.6.1
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
       zod:
         specifier: ^3.23.8
         version: 3.25.76
