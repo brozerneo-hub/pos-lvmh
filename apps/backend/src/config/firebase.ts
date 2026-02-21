@@ -10,13 +10,21 @@ export function getFirebaseApp(): admin.app.App {
     return app;
   }
 
-  // En émulateur local ou test
+  // Dev/test : émulateur local
   if (process.env['FIRESTORE_EMULATOR_HOST'] || process.env['NODE_ENV'] === 'test') {
     app = admin.initializeApp({
       projectId: process.env['FIREBASE_PROJECT_ID'] ?? 'pos-lvmh-dev',
     });
+  } else if (process.env['FIREBASE_SERVICE_ACCOUNT']) {
+    // Production (Render) : service account JSON stocké en variable d'environnement
+    const serviceAccount = JSON.parse(
+      process.env['FIREBASE_SERVICE_ACCOUNT'],
+    ) as admin.ServiceAccount;
+    app = admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
   } else {
-    // Production : utilise les credentials ADC (Application Default Credentials)
+    // Fallback : Application Default Credentials (GCP natif)
     app = admin.initializeApp();
   }
 

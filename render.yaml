@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: pos-lvmh-backend
+    runtime: node
+    rootDir: apps/backend
+    buildCommand: cd ../.. && pnpm install --frozen-lockfile && pnpm --filter @pos-lvmh/shared build && pnpm --filter backend build
+    startCommand: node dist/dev-server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: https://boomerintech.com
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false  # à renseigner manuellement dans le dashboard Render
+    healthCheckPath: /api/health

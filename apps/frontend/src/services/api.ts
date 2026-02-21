@@ -2,7 +2,9 @@ import axios from 'axios';
 import { useAuthStore } from '@/stores/authStore';
 
 export const api = axios.create({
-  baseURL: '/api',
+  // En prod : VITE_API_URL pointe vers le backend Render (ex: https://pos-lvmh.onrender.com/api)
+  // En dev : proxy Vite sur /api
+  baseURL: import.meta.env.VITE_API_URL ?? '/api',
   withCredentials: true, // pour le cookie refreshToken
 });
 

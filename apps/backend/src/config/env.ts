@@ -11,6 +11,8 @@ const envSchema = z.object({
   // Firebase (optionnel en dev avec emulateur)
   FIREBASE_PROJECT_ID: z.string().optional(),
   GOOGLE_APPLICATION_CREDENTIALS: z.string().optional(),
+  // Production : contenu JSON du service account (pour Render)
+  FIREBASE_SERVICE_ACCOUNT: z.string().optional(),
 
   // CORS
   CORS_ORIGIN: z.string().default('http://localhost:5173'),

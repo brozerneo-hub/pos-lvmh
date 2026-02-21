@@ -12,10 +12,12 @@ authRouter.post('/login', authLimiter, validate(LoginSchema), async (req, res, n
     const { email, password } = req.body as { email: string; password: string };
     const result = await login(email, password);
 
+    const isProd = process.env['NODE_ENV'] === 'production';
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
-      sameSite: 'strict',
-      secure: process.env['NODE_ENV'] === 'production',
+      // Cross-domain en prod (OVH ↔ Render) : SameSite=None + Secure obligatoire
+      sameSite: isProd ? 'none' : 'strict',
+      secure: isProd,
       maxAge: 8 * 60 * 60 * 1000,
       path: '/api/auth',
     });
