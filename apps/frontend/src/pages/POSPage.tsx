@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
 import { ProductCategory, PaymentMethod } from '@pos-lvmh/shared';
 import { useCartStore } from '@/stores/cartStore';
@@ -32,6 +32,7 @@ export default function POSPage() {
   const [category, setCategory] = useState('');
   const [showPayment, setShowPayment] = useState(false);
 
+  const queryClient = useQueryClient();
   const { lines, add, remove, setQty, clear, totals } = useCartStore();
   const t = totals();
 
@@ -60,6 +61,8 @@ export default function POSPage() {
     onSuccess: () => {
       clear();
       setShowPayment(false);
+      void queryClient.invalidateQueries({ queryKey: ['stock'] });
+      void queryClient.invalidateQueries({ queryKey: ['sales'] });
     },
   });
 
